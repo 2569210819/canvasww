@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>裁剪保存</title>
+		<link rel="stylesheet" href="css/cropper.min.css">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			html,
+			body {
+				width: 100%;
+				height: 100%;
+			}
+			
+			.container {
+				width: 100%;
+				height: 80%;
+				margin: 0 auto;
+			}
+			
+			img {
+				width: 500px;
+				height: 200px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<p>
+			<label>请选择一个图像文件：</label>
+				<input type="file"  id="file_input">
+		</p>
+
+		<div class="container">
+			<h1>裁剪原图片</h1>
+			<h3>Image</h3>
+
+			<!--将获取的图片放入其中-->
+			<div id="yuantu"></div>
+			<!--<div>
+				<img id="image" src="img/2016.gif" alt="Picture">
+			</div>-->
+
+			<h3>裁剪后的图片</h3>
+			<button type="button" id="bj">编辑</button>
+			<button type="button" id="button">保存</button>
+			<button type="button" id="bbc">不保存</button>
+			<div id="result"></div>
+		</div>
+
+		<script src="js/jquery-2.2.1.js"></script>
+		<script src="js/cropper.min.js"></script>
+		<script>
+			$(function() {
+				var src="";
+				var yuantu = document.getElementById("yuantu"); //获取显示图片的div元素
+				var fileinput = document.getElementById("file_input"); //获取选择图片的input元素
+				//这边是判断本浏览器是否支持这个API。
+				if(typeof FileReader === 'undefined') {
+					yuantu.innerHTML = "抱歉，你的浏览器不支持 FileReader";
+					fileinput.setAttribute('disabled', 'disabled');
+				} else {
+					fileinput.addEventListener('change', readFile, false); //如果支持就监听改变事件，一旦改变了就运行readFile函数。
+				}
+
+				function readFile() {
+					var file = this.files[0]; //获取file对象
+					//判断file的类型是不是图片类型。
+					if(!/image\/\w+/.test(file.type)) {
+						alert("文件必须为图片！");
+						return false;
+					}
+					var reader = new FileReader(); //声明一个FileReader实例
+					reader.readAsDataURL(file); //调用readAsDataURL方法来读取选中的图像文件
+					//最后在onload事件中，获取到成功读取的文件内容，并以插入一个img节点的方式显示选中的图片
+					reader.onload = function(e) {
+						yuantu.innerHTML = '<img src="' + this.result + '" alt=""/>';
+						src=this.result;
+					}
+				}
+                //编辑图片
+				$("#bj").on("click", function() {
+					var $image = $('#yuantu img');
+					var $button = $('#button');
+					var $result = $('#result');
+					var croppable = false; //保证图片加载完
+					$image.cropper({
+						background: false,
+						zoomable: false,
+						ready: function() {
+							croppable = true;
+						}
+					});
+					//保存
+					$button.on('click', function() {
+						var croppedCanvas;
+						if(!croppable) {
+							return;
+						};
+						// Crop  裁剪  返回值为一个画有剪裁图片的canvas。
+						croppedCanvas = $image.cropper('getCroppedCanvas', {
+							width: 160,
+							height: 90
+						});
+						$result.html('<img src="' + croppedCanvas.toDataURL() + '">');
+					})
+					//不保存 即还原
+					$("#bbc").on("click",function(){
+						var $image = $('#yuantu img');
+						 $image.cropper("destroy",);//还原图片
+					})
+				})
+
+			});
+		</script>
+	</body>
+
+</html>
